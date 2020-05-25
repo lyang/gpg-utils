@@ -24,3 +24,7 @@ hs_err_pid*
 
 # Maven generated Files
 target
+
+# IntelliJ files
+.idea
+*.iml
