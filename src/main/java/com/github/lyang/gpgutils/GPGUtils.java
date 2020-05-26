@@ -44,7 +44,7 @@ public class GPGUtils {
     return processStream("--decrypt", stream, consumer, options);
   }
 
-  private static int processStream(
+  public static int processStream(
       String command, InputStream stream, Consumer<InputStream> consumer, String... options)
       throws IOException, InterruptedException {
     Process process = getGPGProcess(command, options).start();
