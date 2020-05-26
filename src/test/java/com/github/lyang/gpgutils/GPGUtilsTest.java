@@ -22,12 +22,18 @@ public class GPGUtilsTest {
   private static final long BYTES = 1024 * 1024 * 100; // 100MB
   private final File KEY = new File(Resources.getResource("private-key.gpg").getPath());
   private long outputLength = 0;
+  private File plaintextFile;
+  private File encryptedFile;
 
   @Before
   public void setUp() throws IOException, InterruptedException {
     tempDir = Files.createTempDir();
     outputLength = 0;
     assertEquals(0, GPGUtils.importKey(KEY, "--homedir", tempDir.getAbsolutePath()));
+    plaintextFile = new File(tempDir, getClass().getSimpleName() + ".txt");
+    encryptedFile = new File(plaintextFile.getPath().concat(".gpg"));
+    assertEquals(0, generateRandomBytes(plaintextFile, BYTES));
+    assertEquals(BYTES, plaintextFile.length());
   }
 
   @After
@@ -36,10 +42,20 @@ public class GPGUtilsTest {
   }
 
   @Test
+  public void encryptFile() throws IOException, InterruptedException {
+    assertEquals(
+        0,
+        GPGUtils.encryptFile(
+            plaintextFile,
+            encryptedFile,
+            "--homedir",
+            tempDir.getAbsolutePath(),
+            "--default-recipient-self"));
+    assertTrue(encryptedFile.length() > 0);
+  }
+
+  @Test
   public void encryptStream() throws IOException, InterruptedException {
-    File file = new File(tempDir, getClass().getSimpleName() + ".txt");
-    assertEquals(0, generateRandomBytes(file, BYTES));
-    assertEquals(BYTES, file.length());
     Consumer<InputStream> consumer =
         stream -> {
           try {
@@ -51,7 +67,7 @@ public class GPGUtilsTest {
     assertEquals(
         0,
         GPGUtils.encryptStream(
-            new FileInputStream(file),
+            new FileInputStream(plaintextFile),
             consumer,
             "--homedir",
             tempDir.getAbsolutePath(),
