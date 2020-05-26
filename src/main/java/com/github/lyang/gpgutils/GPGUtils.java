@@ -43,6 +43,12 @@ public class GPGUtils {
     return processStream("--encrypt", stream, consumer, options);
   }
 
+  public static int decryptStream(
+      InputStream stream, Consumer<InputStream> consumer, String... options)
+      throws IOException, InterruptedException {
+    return processStream("--decrypt", stream, consumer, options);
+  }
+
   private static int processStream(
       String command, InputStream stream, Consumer<InputStream> consumer, String... options)
       throws IOException, InterruptedException {

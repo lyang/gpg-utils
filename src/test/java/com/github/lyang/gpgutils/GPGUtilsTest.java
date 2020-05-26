@@ -75,6 +75,31 @@ public class GPGUtilsTest {
     assertTrue(outputLength > 0);
   }
 
+  @Test
+  public void decryptStream() throws IOException, InterruptedException {
+    assertEquals(
+        0,
+        GPGUtils.encryptFile(
+            plaintextFile,
+            encryptedFile,
+            "--homedir",
+            tempDir.getAbsolutePath(),
+            "--default-recipient-self"));
+    Consumer<InputStream> consumer =
+        stream -> {
+          try {
+            outputLength = ByteStreams.exhaust(stream);
+          } catch (IOException e) {
+            throw new RuntimeException(e);
+          }
+        };
+    assertEquals(
+        0,
+        GPGUtils.decryptStream(
+            new FileInputStream(encryptedFile), consumer, "--homedir", tempDir.getAbsolutePath()));
+    assertTrue(outputLength > 0);
+  }
+
   private int generateRandomBytes(File file, long bytes) throws IOException, InterruptedException {
     String command =
         String.format("base64 /dev/urandom | head -c %d > %s", bytes, file.getAbsolutePath());
