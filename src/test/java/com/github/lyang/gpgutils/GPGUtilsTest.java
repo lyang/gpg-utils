@@ -34,6 +34,8 @@ public class GPGUtilsTest {
     encryptedFile = new File(plaintextFile.getPath().concat(".gpg"));
     assertEquals(0, generateRandomBytes(plaintextFile, BYTES));
     assertEquals(BYTES, plaintextFile.length());
+    generateEncryptedFile(plaintextFile, encryptedFile);
+    assertTrue(encryptedFile.length() > 0);
   }
 
   @After
@@ -52,6 +54,14 @@ public class GPGUtilsTest {
             tempDir.getAbsolutePath(),
             "--default-recipient-self"));
     assertTrue(encryptedFile.length() > 0);
+  }
+
+  @Test
+  public void decryptFile() throws IOException, InterruptedException {
+    assertEquals(
+        0,
+        GPGUtils.decryptFile(encryptedFile, plaintextFile, "--homedir", tempDir.getAbsolutePath()));
+    assertTrue(plaintextFile.length() > 0);
   }
 
   @Test
@@ -77,14 +87,6 @@ public class GPGUtilsTest {
 
   @Test
   public void decryptStream() throws IOException, InterruptedException {
-    assertEquals(
-        0,
-        GPGUtils.encryptFile(
-            plaintextFile,
-            encryptedFile,
-            "--homedir",
-            tempDir.getAbsolutePath(),
-            "--default-recipient-self"));
     Consumer<InputStream> consumer =
         stream -> {
           try {
@@ -107,5 +109,17 @@ public class GPGUtilsTest {
         .redirectError(Redirect.INHERIT)
         .start()
         .waitFor();
+  }
+
+  private void generateEncryptedFile(File plaintextFile, File encryptedFile)
+      throws IOException, InterruptedException {
+    assertEquals(
+        0,
+        GPGUtils.encryptFile(
+            plaintextFile,
+            encryptedFile,
+            "--homedir",
+            tempDir.getAbsolutePath(),
+            "--default-recipient-self"));
   }
 }

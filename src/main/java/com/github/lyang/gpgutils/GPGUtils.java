@@ -24,17 +24,12 @@ public class GPGUtils {
 
   public static int encryptFile(File input, File output, String... options)
       throws IOException, InterruptedException {
-    Consumer<InputStream> consumer =
-        stream -> {
-          try {
-            Files.touch(output);
-            Files.asByteSink(output).writeFrom(stream);
-          } catch (IOException e) {
-            LOGGER.error("Failed to write to {}", output.getAbsolutePath(), e);
-            throw new RuntimeException(e);
-          }
-        };
-    return encryptStream(new FileInputStream(input), consumer, options);
+    return encryptStream(new FileInputStream(input), getFileWriter(output), options);
+  }
+
+  public static int decryptFile(File input, File output, String... options)
+      throws IOException, InterruptedException {
+    return decryptStream(new FileInputStream(input), getFileWriter(output), options);
   }
 
   public static int encryptStream(
@@ -90,5 +85,17 @@ public class GPGUtils {
             throw new RuntimeException(e);
           }
         });
+  }
+
+  private static Consumer<InputStream> getFileWriter(File output) {
+    return stream -> {
+      try {
+        Files.touch(output);
+        Files.asByteSink(output).writeFrom(stream);
+      } catch (IOException e) {
+        LOGGER.error("Failed to write to {}", output.getAbsolutePath(), e);
+        throw new RuntimeException(e);
+      }
+    };
   }
 }
