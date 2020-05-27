@@ -77,6 +77,15 @@ public class GPGUtilsTest {
   }
 
   @Test
+  public void decryptString() throws IOException, InterruptedException {
+    StringBuilder encryptedBuilder = new StringBuilder();
+    GPGUtils.encryptString("GPGUtils", encryptedBuilder, encryptionArgs);
+    StringBuilder decryptedBuilder = new StringBuilder();
+    GPGUtils.decryptString(encryptedBuilder.toString(), decryptedBuilder, decryptionArgs);
+    assertEquals("GPGUtils", decryptedBuilder.toString());
+  }
+
+  @Test
   public void decryptFile() throws IOException, InterruptedException {
     assertEquals(0, GPGUtils.decryptFile(encryptedFile, plaintextFile, decryptionArgs));
     assertTrue(plaintextFile.length() > 0);
