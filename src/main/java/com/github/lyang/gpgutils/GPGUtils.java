@@ -1,6 +1,5 @@
 package com.github.lyang.gpgutils;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ObjectArrays;
 import com.google.common.io.ByteSource;
 import com.google.common.io.ByteStreams;
@@ -14,7 +13,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.util.Arrays;
-import java.util.List;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,9 +67,8 @@ public class GPGUtils {
   }
 
   private static ProcessBuilder getGPGProcess(String command, String... options) {
-    List<String> commands =
-        ImmutableList.<String>builder().add("gpg", command).add(options).build();
-    return new ProcessBuilder(commands).redirectError(ProcessBuilder.Redirect.INHERIT);
+    String[] commandLineArgs = addArg("gpg", addArg(command, options));
+    return new ProcessBuilder(commandLineArgs).redirectError(ProcessBuilder.Redirect.INHERIT);
   }
 
   private static Thread getWriterThread(Process process, InputStream inputStream) {
