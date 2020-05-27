@@ -3,6 +3,7 @@ package com.github.lyang.gpgutils;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import com.google.common.collect.ObjectArrays;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
 import com.google.common.io.MoreFiles;
@@ -24,11 +25,15 @@ public class GPGUtilsTest {
   private long outputLength = 0;
   private File plaintextFile;
   private File encryptedFile;
+  private String[] encryptionArgs;
+  private String[] decryptionArgs;
 
   @Before
   public void setUp() throws IOException, InterruptedException {
     tempDir = Files.createTempDir();
     outputLength = 0;
+    decryptionArgs = new String[] {"--homedir", tempDir.getAbsolutePath()};
+    encryptionArgs = ObjectArrays.concat(decryptionArgs, "--default-recipient-self");
     assertEquals(0, GPGUtils.importKey(KEY, "--homedir", tempDir.getAbsolutePath()));
     plaintextFile = new File(tempDir, getClass().getSimpleName() + ".txt");
     encryptedFile = new File(plaintextFile.getPath().concat(".gpg"));
@@ -44,24 +49,16 @@ public class GPGUtilsTest {
   }
 
   @Test
-  public void encryptFile() throws IOException, InterruptedException {
-    assertEquals(
-        0,
-        GPGUtils.encryptFile(
-            plaintextFile,
-            encryptedFile,
-            "--homedir",
-            tempDir.getAbsolutePath(),
-            "--default-recipient-self"));
-    assertTrue(encryptedFile.length() > 0);
+  public void encryptString() throws IOException, InterruptedException {
+    StringBuilder builder = new StringBuilder();
+    GPGUtils.encryptString("GPGUtils", builder, encryptionArgs);
+    assertTrue(builder.toString().startsWith("-----BEGIN PGP MESSAGE-----"));
   }
 
   @Test
-  public void decryptFile() throws IOException, InterruptedException {
-    assertEquals(
-        0,
-        GPGUtils.decryptFile(encryptedFile, plaintextFile, "--homedir", tempDir.getAbsolutePath()));
-    assertTrue(plaintextFile.length() > 0);
+  public void encryptFile() throws IOException, InterruptedException {
+    assertEquals(0, GPGUtils.encryptFile(plaintextFile, encryptedFile, encryptionArgs));
+    assertTrue(encryptedFile.length() > 0);
   }
 
   @Test
@@ -75,14 +72,14 @@ public class GPGUtilsTest {
           }
         };
     assertEquals(
-        0,
-        GPGUtils.encryptStream(
-            new FileInputStream(plaintextFile),
-            consumer,
-            "--homedir",
-            tempDir.getAbsolutePath(),
-            "--default-recipient-self"));
+        0, GPGUtils.encryptStream(new FileInputStream(plaintextFile), consumer, encryptionArgs));
     assertTrue(outputLength > 0);
+  }
+
+  @Test
+  public void decryptFile() throws IOException, InterruptedException {
+    assertEquals(0, GPGUtils.decryptFile(encryptedFile, plaintextFile, decryptionArgs));
+    assertTrue(plaintextFile.length() > 0);
   }
 
   @Test
@@ -96,9 +93,7 @@ public class GPGUtilsTest {
           }
         };
     assertEquals(
-        0,
-        GPGUtils.decryptStream(
-            new FileInputStream(encryptedFile), consumer, "--homedir", tempDir.getAbsolutePath()));
+        0, GPGUtils.decryptStream(new FileInputStream(encryptedFile), consumer, decryptionArgs));
     assertTrue(outputLength > 0);
   }
 
@@ -113,13 +108,6 @@ public class GPGUtilsTest {
 
   private void generateEncryptedFile(File plaintextFile, File encryptedFile)
       throws IOException, InterruptedException {
-    assertEquals(
-        0,
-        GPGUtils.encryptFile(
-            plaintextFile,
-            encryptedFile,
-            "--homedir",
-            tempDir.getAbsolutePath(),
-            "--default-recipient-self"));
+    assertEquals(0, GPGUtils.encryptFile(plaintextFile, encryptedFile, encryptionArgs));
   }
 }
