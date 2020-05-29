@@ -20,7 +20,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class GPGUtilsTest {
-  private static final long BYTES = 1024 * 1024 * 100; // 100MB
+  private static final long BYTES = 1024 * 1024 * 50; // 50MB
   private static final File KEY = new File(Resources.getResource("private-key.gpg").getPath());
   private static File encryptedFile;
   private static File plaintextFile;
