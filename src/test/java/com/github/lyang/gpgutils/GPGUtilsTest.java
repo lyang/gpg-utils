@@ -4,7 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.ObjectArrays;
+import com.google.common.io.ByteSink;
 import com.google.common.io.ByteStreams;
+import com.google.common.io.FileWriteMode;
 import com.google.common.io.Files;
 import com.google.common.io.MoreFiles;
 import com.google.common.io.Resources;
@@ -12,7 +14,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.ProcessBuilder.Redirect;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import org.junit.AfterClass;
@@ -20,7 +22,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class GPGUtilsTest {
-  private static final long BYTES = 1024 * 1024 * 50; // 50MB
+  private static final int ONE_MB = 1024 * 1024;
+  private static final int FILE_SIZE = ONE_MB * 50; // 50MB
   private static final File KEY = new File(Resources.getResource("private-key.gpg").getPath());
   private static File encryptedFile;
   private static File plaintextFile;
@@ -34,21 +37,25 @@ public class GPGUtilsTest {
     decryptionArgs = new String[] {"--homedir", tempDir.getAbsolutePath()};
     encryptionArgs = ObjectArrays.concat(decryptionArgs, "--default-recipient-self");
     assertEquals(0, GPGUtils.importKey(KEY, "--homedir", tempDir.getAbsolutePath()));
-    plaintextFile = new File(tempDir, GPGUtilsTest.class.getCanonicalName() + ".txt");
-    encryptedFile = new File(tempDir, GPGUtilsTest.class.getCanonicalName() + ".txt.gpg");
-    assertEquals(
-        0,
-        new ProcessBuilder("openssl", "rand", "-base64", String.valueOf(BYTES))
-            .redirectError(Redirect.INHERIT)
-            .redirectOutput(plaintextFile)
-            .start()
-            .waitFor());
-    assertEquals(0, GPGUtils.encryptFile(plaintextFile, encryptedFile, encryptionArgs));
+    generateFiles();
   }
 
   @AfterClass
   public static void tearDown() throws Exception {
     MoreFiles.deleteRecursively(tempDir.toPath());
+  }
+
+  private static void generateFiles() throws IOException, InterruptedException {
+    plaintextFile = new File(tempDir, GPGUtilsTest.class.getCanonicalName() + ".txt");
+    encryptedFile = new File(tempDir, GPGUtilsTest.class.getCanonicalName() + ".txt.gpg");
+    ByteSink byteSink = Files.asByteSink(plaintextFile, FileWriteMode.APPEND);
+    Random random = new Random();
+    byte[] bytes = new byte[ONE_MB];
+    for (int i = 0; i < FILE_SIZE; i += ONE_MB) {
+      random.nextBytes(bytes);
+      byteSink.write(bytes);
+    }
+    assertEquals(0, GPGUtils.encryptFile(plaintextFile, encryptedFile, encryptionArgs));
   }
 
   @Test
