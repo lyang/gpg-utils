@@ -131,11 +131,9 @@ public class GPGUtils {
       throws IOException, InterruptedException {
     Process process = getGPGProcess(command, options).start();
     Thread writer = getWriterThread(process, inputStream);
-    Thread reader = getReaderThread(process, consumer);
     writer.start();
-    reader.start();
+    consumer.accept(process.getInputStream());
     writer.join();
-    reader.join();
     return process.waitFor();
   }
 
@@ -151,18 +149,6 @@ public class GPGUtils {
             ByteStreams.copy(inputStream, stream);
           } catch (IOException e) {
             LOGGER.error("Failed in writer thread", e);
-            throw new RuntimeException(e);
-          }
-        });
-  }
-
-  private static Thread getReaderThread(Process process, Consumer<InputStream> consumer) {
-    return new Thread(
-        () -> {
-          try (InputStream stream = process.getInputStream()) {
-            consumer.accept(stream);
-          } catch (IOException e) {
-            LOGGER.error("Failed in reader thread", e);
             throw new RuntimeException(e);
           }
         });
