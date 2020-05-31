@@ -61,6 +61,14 @@ public class GPGUtilsTest {
   @Test
   public void encryptString() throws IOException, InterruptedException {
     StringBuilder builder = new StringBuilder();
+    String[] options = ObjectArrays.concat(encryptionArgs, "--armor");
+    assertEquals(0, GPGUtils.encryptString("GPGUtils", builder, options));
+    assertTrue(builder.toString().startsWith("-----BEGIN PGP MESSAGE-----"));
+  }
+
+  @Test
+  public void encryptStringEnsureArmored() throws IOException, InterruptedException {
+    StringBuilder builder = new StringBuilder();
     assertEquals(0, GPGUtils.encryptString("GPGUtils", builder, encryptionArgs));
     assertTrue(builder.toString().startsWith("-----BEGIN PGP MESSAGE-----"));
   }
