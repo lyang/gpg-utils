@@ -146,4 +146,11 @@ public class GPGUtilsTest {
         0, GPGUtils.decryptStream(new FileInputStream(encryptedFile), consumer, decryptionArgs));
     assertTrue(outputLength.get() > 0);
   }
+
+  @Test
+  public void decryptBrokenStream() throws IOException, InterruptedException {
+    FileInputStream inputStream = new FileInputStream(encryptedFile);
+    inputStream.close();
+    assertEquals(2, GPGUtils.decryptStream(inputStream, stream -> {}, decryptionArgs));
+  }
 }
