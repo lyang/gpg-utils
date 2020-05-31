@@ -107,6 +107,11 @@ public class GPGUtilsTest {
   }
 
   @Test
+  public void decryptEmptyString() throws IOException, InterruptedException {
+    assertEquals(2, GPGUtils.decryptString("", new StringBuilder(), decryptionArgs));
+  }
+
+  @Test
   public void decryptFile() throws IOException, InterruptedException {
     File file = new File(tempDir, "decrypted.txt");
     assertEquals(0, GPGUtils.decryptFile(encryptedFile, file, decryptionArgs));
