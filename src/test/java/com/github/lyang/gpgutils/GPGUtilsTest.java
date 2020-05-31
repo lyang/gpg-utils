@@ -1,5 +1,6 @@
 package com.github.lyang.gpgutils;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -19,7 +20,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class GPGUtilsTest {
   private static final int ONE_MB = 1024 * 1024;
@@ -30,6 +33,7 @@ public class GPGUtilsTest {
   private static File tempDir;
   private static String[] decryptionArgs;
   private static String[] encryptionArgs;
+  @Rule public ExpectedException exceptionRule = ExpectedException.none();
 
   @BeforeClass
   public static void beforeClass() throws IOException, InterruptedException {
@@ -116,6 +120,15 @@ public class GPGUtilsTest {
     File file = new File(tempDir, "decrypted.txt");
     assertEquals(0, GPGUtils.decryptFile(encryptedFile, file, decryptionArgs));
     assertTrue(file.length() > 0);
+  }
+
+  @Test
+  public void decryptToReadonlyFile() throws IOException, InterruptedException {
+    File file = new File(tempDir, "readonly.txt");
+    file.createNewFile();
+    file.setReadOnly();
+    exceptionRule.expectCause(instanceOf(IOException.class));
+    GPGUtils.decryptFile(encryptedFile, file, decryptionArgs);
   }
 
   @Test
