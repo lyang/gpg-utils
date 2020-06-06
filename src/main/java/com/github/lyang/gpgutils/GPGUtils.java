@@ -12,7 +12,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
-import java.util.Arrays;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +23,7 @@ import org.slf4j.LoggerFactory;
 public class GPGUtils {
   private static final Logger LOGGER = LoggerFactory.getLogger(GPGUtils.class);
   private static final Consumer<InputStream> NOOP = stream -> {};
+  private static final String[] DEFAULT_ARGS = new String[] {"gpg", "--batch", "--no-tty"};
 
   /**
    * Import GPG public or private keys
@@ -47,7 +47,7 @@ public class GPGUtils {
    */
   public static int encryptString(String input, StringBuilder builder, String... options)
       throws IOException, InterruptedException {
-    return encryptStream(toInputStream(input), getWriter(builder), addArg("--armor", options));
+    return encryptStream(toInputStream(input), getWriter(builder), merge(options, "--armor"));
   }
 
   /**
@@ -129,7 +129,7 @@ public class GPGUtils {
   public static int processStream(
       String command, InputStream inputStream, Consumer<InputStream> consumer, String... options)
       throws IOException, InterruptedException {
-    Process process = getGPGProcess(command, options).start();
+    Process process = getGPGProcess(merge(options, command)).start();
     Thread writer = getWriterThread(process, inputStream);
     writer.start();
     consumer.accept(process.getInputStream());
@@ -137,9 +137,9 @@ public class GPGUtils {
     return process.waitFor();
   }
 
-  private static ProcessBuilder getGPGProcess(String command, String... options) {
-    String[] commandLineArgs = addArg("gpg", addArg(command, options));
-    return new ProcessBuilder(commandLineArgs).redirectError(ProcessBuilder.Redirect.INHERIT);
+  private static ProcessBuilder getGPGProcess(String... options) {
+    String[] args = merge(DEFAULT_ARGS, options);
+    return new ProcessBuilder(args).redirectError(ProcessBuilder.Redirect.INHERIT);
   }
 
   private static Thread getWriterThread(Process process, InputStream inputStream) {
@@ -177,15 +177,11 @@ public class GPGUtils {
     };
   }
 
-  private static String[] addArg(String arg, String[] options) {
-    if (Arrays.stream(options).anyMatch(arg::equalsIgnoreCase)) {
-      return options;
-    } else {
-      return ObjectArrays.concat(arg, options);
-    }
-  }
-
   private static InputStream toInputStream(String input) throws IOException {
     return ByteSource.wrap(input.getBytes()).openBufferedStream();
+  }
+
+  private static String[] merge(String[] left, String... right) {
+    return ObjectArrays.concat(left, right, String.class);
   }
 }
