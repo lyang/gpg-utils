@@ -78,6 +78,13 @@ public class GPGUtilsTest {
   }
 
   @Test
+  public void encryptStringWithoutBuilder() throws IOException, InterruptedException {
+    assertTrue(
+        GPGUtils.encryptString("GPGUtils", encryptionArgs)
+            .startsWith("-----BEGIN PGP MESSAGE-----"));
+  }
+
+  @Test
   public void encryptFile() throws IOException, InterruptedException {
     File file = new File(tempDir, "encrypted.gpg");
     assertEquals(0, GPGUtils.encryptFile(plaintextFile, file, encryptionArgs));

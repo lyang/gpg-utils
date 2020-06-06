@@ -51,6 +51,19 @@ public class GPGUtils {
   }
 
   /**
+   * Encrypt a {@link String}
+   * @param input The {@link String} to be encrypted
+   * @param options CLI options to be passed to gpg {@link Process}
+   * @return The armor encrypted result
+   */
+  public static String encryptString(String input, String... options)
+      throws IOException, InterruptedException {
+    StringBuilder builder = new StringBuilder();
+    encryptString(input, builder, options);
+    return builder.toString();
+  }
+
+  /**
    * Encrypt a {@link File}
    *
    * @param input The {@link File} to be encrypted
