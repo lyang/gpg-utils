@@ -6,7 +6,7 @@
 
   <groupId>com.github.lyang</groupId>
   <artifactId>gpg-utils</artifactId>
-  <version>0.2</version>
+  <version>0.3-SNAPSHOT</version>
 
   <name>${project.groupId}:${project.artifactId}</name>
   <description>A simple wrapper for `ProcessBuilder` to make shell out to `gpg` easier in Java</description>
