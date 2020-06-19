@@ -139,6 +139,14 @@ public class GPGUtilsTest {
   }
 
   @Test
+  public void decryptStreamToFile() throws IOException, InterruptedException {
+    File file = new File(tempDir, "decrypted.txt");
+    assertEquals(
+        0, GPGUtils.decryptStream(new FileInputStream(encryptedFile), file, decryptionArgs));
+    assertTrue(file.length() > 0);
+  }
+
+  @Test
   public void decryptStream() throws IOException, InterruptedException {
     AtomicLong outputLength = new AtomicLong();
     Consumer<InputStream> consumer =

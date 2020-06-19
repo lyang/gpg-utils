@@ -52,6 +52,7 @@ public class GPGUtils {
 
   /**
    * Encrypt a {@link String}
+   *
    * @param input The {@link String} to be encrypted
    * @param options CLI options to be passed to gpg {@link Process}
    * @return The armor encrypted result
@@ -114,6 +115,19 @@ public class GPGUtils {
   public static int decryptFile(File input, File output, String... options)
       throws IOException, InterruptedException {
     return decryptStream(new FileInputStream(input), getWriter(output), options);
+  }
+
+  /**
+   * Decrypt an {@link InputStream} to a {@link File}
+   *
+   * @param inputStream The {@link InputStream} to be decrypted
+   * @param output The {@link File} to hold the decrypted result
+   * @param options CLI options to be passed to gpg {@link Process}
+   * @return Exit code of the gpg {@link Process}
+   */
+  public static int decryptStream(InputStream inputStream, File output, String... options)
+      throws IOException, InterruptedException {
+    return decryptStream(inputStream, getWriter(output), options);
   }
 
   /**
