@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
  * {@link GPGUtils} is a simple wrapper for {@link ProcessBuilder} to make calling gpg easier in
  * java.
  */
-public class GPGUtils {
+public abstract class GPGUtils {
   private static final Logger LOGGER = LoggerFactory.getLogger(GPGUtils.class);
   private static final Consumer<InputStream> NOOP = stream -> {};
   private static final String[] DEFAULT_ARGS = new String[] {"gpg", "--batch", "--no-tty"};
