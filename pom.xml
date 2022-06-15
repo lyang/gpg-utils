@@ -6,7 +6,7 @@
 
   <groupId>com.github.lyang</groupId>
   <artifactId>gpg-utils</artifactId>
-  <version>0.3-SNAPSHOT</version>
+  <version>0.3</version>
 
   <name>${project.groupId}:${project.artifactId}</name>
   <description>A simple wrapper for `ProcessBuilder` to make shell out to `gpg` easier in Java</description>
@@ -142,7 +142,7 @@
         <plugin>
           <groupId>org.sonatype.plugins</groupId>
           <artifactId>nexus-staging-maven-plugin</artifactId>
-          <version>1.6.8</version>
+          <version>1.6.13</version>
         </plugin>
         <plugin>
           <groupId>org.jacoco</groupId>
