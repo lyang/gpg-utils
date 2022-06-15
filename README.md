@@ -1,4 +1,4 @@
-# gpg-utils [![Build Status](https://travis-ci.com/lyang/gpg-utils.svg?branch=master)](https://travis-ci.com/lyang/saml-proxy) [![Maintainability](https://api.codeclimate.com/v1/badges/382b982629fafcdb7365/maintainability)](https://codeclimate.com/github/lyang/gpg-utils/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/382b982629fafcdb7365/test_coverage)](https://codeclimate.com/github/lyang/gpg-utils/test_coverage) [![Maven Central](https://img.shields.io/maven-central/v/com.github.lyang/gpg-utils.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.github.lyang%22%20AND%20a:%22gpg-utils%22) [![javadoc](https://javadoc.io/badge2/com.github.lyang/gpg-utils/javadoc.svg)](https://javadoc.io/doc/com.github.lyang/gpg-utils)
+# gpg-utils [![Build](https://github.com/lyang/gpg-utils/actions/workflows/build.yml/badge.svg)](https://github.com/lyang/gpg-utils/actions/workflows/build.yml) [![Maintainability](https://api.codeclimate.com/v1/badges/382b982629fafcdb7365/maintainability)](https://codeclimate.com/github/lyang/gpg-utils/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/382b982629fafcdb7365/test_coverage)](https://codeclimate.com/github/lyang/gpg-utils/test_coverage) [![Maven Central](https://img.shields.io/maven-central/v/com.github.lyang/gpg-utils.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.github.lyang%22%20AND%20a:%22gpg-utils%22) [![javadoc](https://javadoc.io/badge2/com.github.lyang/gpg-utils/javadoc.svg)](https://javadoc.io/doc/com.github.lyang/gpg-utils)
 `GPGUtils` is a simple wrapper for `ProcessBuilder` to make shell out to `gpg` easier in Java.
 
 ## What
@@ -15,3 +15,17 @@ Using `ProcessBuilder` is much simpler compared with `BouncyCastle`. But it's no
 
 ## How to use
 Refer to the [Unit Tests](src/test/java/com/github/lyang/gpgutils/GPGUtilsTest.java) for now.
+
+## Running Tests
+```bash
+mvn verify
+```
+
+## Deploy
+Need to set environment variables first:
+* `GPG_KEYNAME`
+* `OSSRH_USERNAME`
+* `OSSRH_PASSWORD`
+```bash
+mvn -s settings.xml -P ossrh clean deploy
+```
