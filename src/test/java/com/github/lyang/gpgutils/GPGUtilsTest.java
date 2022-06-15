@@ -15,17 +15,27 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+@SuppressWarnings("UnstableApiUsage")
 public class GPGUtilsTest {
+  private static final File KEY = new File(Resources.getResource("private-key.gpg").getPath());
   private static final int ONE_MB = 1024 * 1024;
   private static final int FILE_SIZE = ONE_MB * 50; // 50MB
-  private static final File KEY = new File(Resources.getResource("private-key.gpg").getPath());
+  private static final Set<PosixFilePermission> permissions =
+      PosixFilePermissions.fromString("r--r--r--");
+  private static final FileAttribute<Set<PosixFilePermission>> fileAttributes =
+      PosixFilePermissions.asFileAttribute(permissions);
   private static File encryptedFile;
   private static File plaintextFile;
   private static File tempDir;
@@ -34,7 +44,8 @@ public class GPGUtilsTest {
 
   @BeforeClass
   public static void beforeClass() throws IOException, InterruptedException {
-    tempDir = Files.createTempDir();
+    String baseDir = String.valueOf(System.currentTimeMillis());
+    tempDir = java.nio.file.Files.createTempDirectory(baseDir).toFile();
     decryptionArgs = new String[] {"--homedir", tempDir.getAbsolutePath()};
     encryptionArgs = ObjectArrays.concat(decryptionArgs, "--default-recipient-self");
     assertEquals(0, GPGUtils.importKey(KEY, "--homedir", tempDir.getAbsolutePath()));
@@ -127,10 +138,9 @@ public class GPGUtilsTest {
   }
 
   @Test
-  public void decryptToReadonlyFile() throws IOException, InterruptedException {
-    File file = new File(tempDir, "readonly.txt");
-    file.createNewFile();
-    file.setReadOnly();
+  public void decryptToReadonlyFile() throws IOException {
+    Path path = Path.of(tempDir.getAbsolutePath(), "readonly.txt");
+    File file = java.nio.file.Files.createFile(path, fileAttributes).toFile();
     RuntimeException exception =
         assertThrows(
             RuntimeException.class,
