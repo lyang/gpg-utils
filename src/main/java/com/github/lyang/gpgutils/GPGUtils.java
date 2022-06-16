@@ -24,6 +24,7 @@ public abstract class GPGUtils {
   private static final Logger LOGGER = LoggerFactory.getLogger(GPGUtils.class);
   private static final Consumer<InputStream> NOOP = stream -> {};
   private static final String[] DEFAULT_ARGS = new String[] {"gpg", "--batch", "--no-tty"};
+  private GPGUtils() {}
 
   /**
    * Import GPG public or private keys
@@ -181,6 +182,7 @@ public abstract class GPGUtils {
         });
   }
 
+  @SuppressWarnings("UnstableApiUsage")
   private static Consumer<InputStream> getWriter(File output) {
     return stream -> {
       try {

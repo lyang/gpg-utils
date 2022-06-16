@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import com.google.common.collect.ObjectArrays;
 import com.google.common.io.ByteSink;
 import com.google.common.io.ByteStreams;
+import com.google.common.io.CharStreams;
 import com.google.common.io.FileWriteMode;
 import com.google.common.io.Files;
 import com.google.common.io.MoreFiles;
@@ -26,6 +27,8 @@ import java.util.function.Consumer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 @SuppressWarnings("UnstableApiUsage")
 public class GPGUtilsTest {
@@ -128,6 +131,18 @@ public class GPGUtilsTest {
   @Test
   public void decryptEmptyString() throws IOException, InterruptedException {
     assertEquals(2, GPGUtils.decryptString("", new StringBuilder(), decryptionArgs));
+  }
+
+  @Test
+  public void decryptionErrorHandling() throws IOException, InterruptedException {
+    try (MockedStatic<CharStreams> mockedStream = Mockito.mockStatic(CharStreams.class)) {
+      mockedStream.when(() -> CharStreams.toString(Mockito.any())).thenThrow(IOException.class);
+      RuntimeException exception =
+          assertThrows(
+              RuntimeException.class,
+              () -> GPGUtils.decryptString("", new StringBuilder(), decryptionArgs));
+      assertTrue(exception.getCause() instanceof IOException);
+    }
   }
 
   @Test
