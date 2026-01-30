@@ -53,6 +53,8 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
+    <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+    <sonar.organization>lyang</sonar.organization>
   </properties>
 
   <dependencies>
@@ -159,6 +161,11 @@
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>versions-maven-plugin</artifactId>
           <version>2.21.0</version>
+        </plugin>
+        <plugin>
+          <groupId>org.sonarsource.scanner.maven</groupId>
+          <artifactId>sonar-maven-plugin</artifactId>
+          <version>5.1.0.4751</version>
         </plugin>
       </plugins>
     </pluginManagement>
