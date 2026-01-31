@@ -6,22 +6,45 @@ on:
   pull_request:
     branches: [ "main" ]
 
+permissions:
+  checks: write
+  pull-requests: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
       - name: Set up JDK 11
         uses: actions/setup-java@v5
         with:
           java-version: '11'
           distribution: 'temurin'
           cache: maven
+
+      - name: Cache SonarQube packages
+        uses: actions/cache@v5
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
       - name: Build with Maven
         run: mvn -B verify --file pom.xml 
+
       - name: Code coverage
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: target/site/jacoco/jacoco.xml
+
+      - name: SonarQube
+        if: github.ref_name == github.event.repository.default_branch
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+
