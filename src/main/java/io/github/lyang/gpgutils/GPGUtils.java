@@ -1,4 +1,4 @@
-package com.github.lyang.gpgutils;
+package io.github.lyang.gpgutils;
 
 import com.google.common.collect.ObjectArrays;
 import com.google.common.io.ByteSource;
