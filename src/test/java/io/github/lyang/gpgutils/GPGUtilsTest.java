@@ -1,4 +1,4 @@
-package com.github.lyang.gpgutils;
+package io.github.lyang.gpgutils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
