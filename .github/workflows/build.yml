@@ -8,6 +8,7 @@ on:
 
 permissions:
   checks: write
+  packages: write
   pull-requests: write
 
 jobs:
@@ -24,6 +25,9 @@ jobs:
         with:
           java-version: '11'
           distribution: 'temurin'
+          server-id: github
+          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
           cache: maven
 
       - name: Cache SonarQube packages
@@ -34,7 +38,7 @@ jobs:
           restore-keys: ${{ runner.os }}-sonar
 
       - name: Build with Maven
-        run: mvn -B verify --file pom.xml 
+        run: mvn -B clean verify --file pom.xml 
 
       - name: Code coverage
         uses: codecov/codecov-action@v5
@@ -48,3 +52,38 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
 
+      - name: Set release variable (pull request)
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "SOURCE=PR${{ github.event.pull_request.number }}" >> $GITHUB_ENV
+
+      - name: Set release variable (branch)
+        if: github.event_name != 'pull_request'
+        run: |
+          echo "SOURCE=${{ github.ref_name }}" >> $GITHUB_ENV
+
+      - name: Release
+        id: release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+          MAJOR: ${{ github.ref_name == github.event.repository.default_branch && '1' || '0' }}
+        run: |
+          ./release.sh >> $GITHUB_OUTPUT
+
+      - name: Comment (pull request)
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'Version `${{ steps.release.outputs.revision }}` is deployed!'
+            })
+
+      - name: Release summary
+        run: |
+          echo "Version \`${{ steps.release.outputs.revision }}\` is deployed!" >> $GITHUB_STEP_SUMMARY
